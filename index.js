@@ -11,8 +11,7 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-const uri =
-  `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.jc626.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.jc626.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -31,7 +30,7 @@ async function run() {
       const result = await parcelCollection.insertOne(parcel);
       res.json(result);
     });
-    
+
     //GET Parcels API
     app.get("/parcels", async (req, res) => {
       const cursor = parcelCollection.find({});
@@ -49,6 +48,25 @@ async function run() {
       res.send(result);
     });
 
+    // Update a Parcel status
+    app.put("/updateParcel/:id", async (req, res) => {
+      const id = req.params.id;
+      const updatedParcel = req.body;
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          status: updatedParcel.status,
+        },
+      };
+      const result = await parcelCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      res.send(result);
+    });
+
     // DELETE a Parcel
     app.delete("/deleteParcel/:id", async (req, res) => {
       // console.log(req.params.id);
@@ -57,7 +75,6 @@ async function run() {
       });
       res.send(result);
     });
-
   } finally {
     // await client.close();
   }
