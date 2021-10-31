@@ -2,6 +2,7 @@ const express = require("express");
 const { MongoClient } = require("mongodb");
 require("dotenv").config();
 const cors = require("cors");
+const ObjectId = require("mongodb").ObjectId;
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -47,6 +48,16 @@ async function run() {
         .toArray();
       res.send(result);
     });
+
+    // DELETE a Parcel
+    app.delete("/deleteParcel/:id", async (req, res) => {
+      // console.log(req.params.id);
+      const result = await parcelCollection.deleteOne({
+        _id: ObjectId(req.params.id),
+      });
+      res.send(result);
+    });
+
   } finally {
     // await client.close();
   }
